@@ -1,0 +1,16 @@
+version: '3.8'
+
+services:
+  # Aplicacao Web Django
+  appdjango:
+    build:
+      context: .
+      args:
+        PROJ_APP_NAME: ${DJANGO_APP_NAME}
+    container_name: django
+    env_file:
+      - config/env/env_django
+    volumes:
+      - .:/opt/services/${DJANGO_APP_NAME}/src
+    ports:
+      - 8000:8000
