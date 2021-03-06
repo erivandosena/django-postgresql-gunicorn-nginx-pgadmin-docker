@@ -3,14 +3,14 @@ FROM python:3.7
 
 LABEL maintainer=erivandosena@gmail.com
 
-# Cria link simbolico para .env
+# Cria link simbolico
 RUN ln -sf config/env/env_django .env
 
 # Define variaveis de ambiente
 ENV PYTHONDONTWRITEBYTECODE 1
 ENV PYTHONUNBUFFERED 1
-ARG PROJ_APP_NAME
-ENV PROJECT_DIR /opt/services/${PROJ_APP_NAME}/src
+ARG DOCKER_SERVICE_NAME
+ENV PROJECT_DIR /opt/services/${DOCKER_SERVICE_NAME}/src
 
 # Cria caminho da aplicacao
 RUN mkdir -p ${PROJECT_DIR}
@@ -30,5 +30,5 @@ RUN pip3 uninstall --yes pipenv
 # Servico Django
 EXPOSE 8000
 
-# Define comando padrao para execucao ao iniciar o conteiner
-CMD ["python3", "manage.py", "runserver", "0:8000"]
+# Define comandos para execucao ao iniciar o conteiner
+CMD ["sh", "-c", "python3 manage.py collectstatic --no-input; python3 manage.py migrate; python3 manage.py createsuperuser --no-input; gunicorn --chdir appweb --bind :8000 appweb.wsgi:application"]

@@ -12,25 +12,29 @@ https://docs.djangoproject.com/en/3.1/ref/settings/
 
 from pathlib import Path
 import environ
-
-# Inicializa variáveis ​​de ambiente
-env = environ.Env()
-env.read_env(env.str('ENV_PATH', '.env'))
+import os
 
 # Construa caminhos dentro do projeto com: BASE_DIR / 'subdir'.
-BASE_DIR = Path(__file__).resolve().parent.parent
+BASE_DIR = Path(__file__).resolve().parent.parent.parent
+
+# Construa caminhos dentro do projeto com: BASE_ENV / 'subdir'.
+BASE_ENV = Path(__file__).resolve().parent.parent
+
+# Inicializa variáveis ​​de ambiente
+environ.Env.read_env(env_file=os.path.join(BASE_ENV, '.env'))
 
 # Configurações de desenvolvimento de início rápido - inadequadas para produção
 # Veja https://docs.djangoproject.com/en/3.1/howto/deployment/checklist/
 
 # AVISO DE SEGURANÇA: mantenha a chave secreta usada na produção em segredo!
 # SECRET_KEY = '%f96#wb#9%-ovkr9v!q846no(yo0cp(ktrzq+z7$bi%=sc2ins'
-SECRET_KEY = env('DJANGO_SECRET_KEY')
+#SECRET_KEY = env('DJANGO_SECRET_KEY')
+SECRET_KEY = os.environ.get('DJANGO_SECRET_KEY')
 
 # AVISO DE SEGURANÇA: não execute com a depuração ativada na produção!
 DEBUG = True
 
-ALLOWED_HOSTS = ['127.0.0.1','10.46.0.11']
+ALLOWED_HOSTS = ['appdjango', 'localhost', '127.0.0.1', '10.46.0.11']
 
 
 # Definição de aplicativo
@@ -81,13 +85,13 @@ WSGI_APPLICATION = 'appweb.wsgi.application'
 DATABASES = {
     'default': {
         #'ENGINE': 'django.db.backends.sqlite3',
-        #'NAME': BASE_DIR / 'db.sqlite3',
+        #'NAME': BASE_ENV / 'db.sqlite3',
         'ENGINE': 'django.db.backends.postgresql_psycopg2',
-        'NAME': env('DJANGO_POSTGRES_DB'),
-        'USER': env('DJANGO_POSTGRES_USER'),
-        'PASSWORD': env('DJANGO_POSTGRES_PASSWORD'),
-        'HOST': env('DJANGO_POSTGRES_HOST'),
-        'PORT': env('DJANGO_POSTGRES_PORT'),
+        'NAME': os.environ.get('DJANGO_POSTGRES_DB'),
+        'USER': os.environ.get('DJANGO_POSTGRES_USER'),
+        'PASSWORD': os.environ.get('DJANGO_POSTGRES_PASSWORD'),
+        'HOST': os.environ.get('DJANGO_POSTGRES_HOST'),
+        'PORT': os.environ.get('DJANGO_POSTGRES_PORT'),
     }
 }
 
@@ -124,8 +128,11 @@ USE_L10N = True
 
 USE_TZ = True
 
-
 # Arquivos estáticos (CSS, JavaScript, imagens)
 # https://docs.djangoproject.com/en/3.1/howto/static-files/
 
 STATIC_URL = '/static/'
+
+# Caminho deve correponder conforme declarado no NginX conf
+STATIC_ROOT = os.path.join(BASE_DIR, 'static')
+MEDIA_ROOT = os.path.join(BASE_DIR, 'media')

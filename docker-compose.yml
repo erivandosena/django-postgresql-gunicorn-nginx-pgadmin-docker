@@ -1,21 +1,22 @@
 version: '3.8'
 
 services:
-  # Aplicacao Web Django
+  # Aplicacao Web Django usando Gunicorn(WSGI server)
   appdjango:
     build:
       context: .
       args:
-        PROJ_APP_NAME: ${DJANGO_APP_NAME}
-    container_name: django
+        DOCKER_SERVICE_NAME: ${DJANGO_DOCKER_SERVICE_NAME}
+    container_name: django-gunicorn
     env_file:
       - config/env/env_django
     volumes:
-      - .:/opt/services/${DJANGO_APP_NAME}/src
-    ports:
-      - 8000:8000
+      - .:/opt/services/${DJANGO_DOCKER_SERVICE_NAME}/src
+      - static_data:/opt/services/${DJANGO_DOCKER_SERVICE_NAME}/static
+      - media_data:/opt/services/${DJANGO_DOCKER_SERVICE_NAME}/media
     networks:
       - database_network
+      - nginx_network
     depends_on:
       - postgresql
       
@@ -32,9 +33,28 @@ services:
     networks:
       - database_network
       
+  # Servidor Nginx (Proxy reverso, HTTP, IMAP/POP3)
+  nginx:
+    image: nginx:1.19
+    container_name: nginx_server
+    ports:
+      - 8000:80
+    volumes:
+      - ./config/nginx/conf.d:/etc/nginx/conf.d
+      - static_data:/opt/services/${DJANGO_DOCKER_SERVICE_NAME}/static
+      - media_data:/opt/services/${DJANGO_DOCKER_SERVICE_NAME}/media
+    networks:
+      - nginx_network
+    depends_on:
+      - appdjango
+      
 networks:
   database_network:
+    driver: bridge
+  nginx_network:
     driver: bridge
     
 volumes:
   database_data:
+  static_data:
+  media_data:
