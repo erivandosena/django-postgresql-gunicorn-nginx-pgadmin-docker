@@ -34,7 +34,7 @@ SECRET_KEY = os.environ.get('DJANGO_SECRET_KEY')
 # AVISO DE SEGURANÇA: não execute com a depuração ativada na produção!
 DEBUG = True
 
-ALLOWED_HOSTS = ['appdjango', 'localhost', '127.0.0.1', '10.46.0.11']
+ALLOWED_HOSTS = ['*']
 
 
 # Definição de aplicativo
